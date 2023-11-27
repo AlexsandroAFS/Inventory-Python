@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 
+
 class DBManager:
     def __init__(self, host, user, password, database):
         self.host = host
@@ -29,12 +30,26 @@ class DBManager:
         """
         try:
             cursor = self.connection.cursor()
-            query = "SELECT descricao FROM estoque WHERE codigo = %s"
+            query = "SELECT descricao FROM item WHERE iditem = %s"
             cursor.execute(query, (codigo,))
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
             print(f"Erro ao buscar descrição: {e}")
+            return None
+
+    def get_localizacao(self, id):
+        """
+        Busca a descrição de um localizacao no banco de dados com base no código fornecido.
+        """
+        try:
+            cursor = self.connection.cursor()
+            query = "SELECT descricao FROM localizacao WHERE id = %s"
+            cursor.execute(query, (id,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+        except Error as e:
+            print(f"Erro ao buscar localizacao: {e}")
             return None
 
     def close_connection(self):
@@ -43,14 +58,14 @@ class DBManager:
             self.connection.close()
             print("Conexão com o MySQL foi encerrada")
 
-    def add_inventory_item(self, contagem, parametrizacao, endereco, codigo, quantidade):
+    def add_inventory_item(self, contagem, usuario, endereco, codigo, quantidade):
         try:
             cursor = self.connection.cursor()
             query = """
-               INSERT INTO tabela_inventario (contagem, parametrizacao, endereco, codigo, quantidade)
+               INSERT INTO inventario (contagem, usuario, endereco, codigo, quantidade)
                VALUES (%s, %s, %s, %s, %s)
                """
-            cursor.execute(query, (contagem, parametrizacao, endereco, codigo, quantidade))
+            cursor.execute(query, (contagem, usuario, endereco, codigo, quantidade))
             self.connection.commit()
         except Error as e:
             print(f"Erro ao adicionar item ao inventário: {e}")

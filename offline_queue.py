@@ -35,13 +35,13 @@ class OfflineQueue:
             if action == 'add':
                 # Desempacotar os dados do item
                 contagem = item_data.get('contagem')
-                parametrizacao = item_data.get('parametrizacao')
+                usuario = item_data.get('usuario')
                 endereco = item_data.get('endereco')
                 codigo = item_data.get('codigo')
                 quantidade = item_data.get('quantidade')
 
                 # Adicionar o item ao banco de dados
-                db_manager.add_inventory_item(contagem, parametrizacao, endereco, codigo, quantidade)
+                db_manager.add_inventory_item(contagem, usuario, endereco, codigo, quantidade)
 
         # Limpar a fila após o processamento
         self.queue = []

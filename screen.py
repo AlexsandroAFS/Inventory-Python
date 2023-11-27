@@ -7,7 +7,7 @@ import socket
 
 
 # Tela de Parametrização de Contagem
-class ParametrizacaoScreen(Screen):
+class UsuarioScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation='vertical')
@@ -34,7 +34,7 @@ class ParametrizacaoScreen(Screen):
 
         # Define os valores na tela de contagem
         contagem_screen = self.manager.get_screen('contagem')
-        contagem_screen.set_parametrizacao(contagem, operador)
+        contagem_screen.set_usuario(contagem, operador)
 
         # Muda para a tela de contagem
         self.manager.current = 'contagem'
@@ -50,9 +50,17 @@ class ContagemScreen(Screen):
         self.endereco_input = TextInput(multiline=False)
         self.layout.add_widget(self.endereco_input)
 
+        # Label para mostrar a descrição
+        self.descricao_label = Label(text="Descrição do Item:")
+        self.layout.add_widget(self.descricao_label)
+
+        # Campo
         self.layout.add_widget(Label(text='Código:'))
         self.codigo_input = TextInput(multiline=False)
         self.layout.add_widget(self.codigo_input)
+
+        # Ligando o evento de texto modificado no campo de código
+        self.codigo_input.bind(text=self.on_codigo_text)
 
         self.layout.add_widget(Label(text='Quantidade:'))
         self.quantidade_input = TextInput(multiline=False)
@@ -72,7 +80,12 @@ class ContagemScreen(Screen):
         self.contagem = None
         self.operador = None
 
-    def set_parametrizacao(self, contagem, operador):
+    def on_codigo_text(self, instance, value):
+        # Busca a descrição quando o texto do código é modificado
+        descricao = self.db_manager.get_descricao(value)
+        self.descricao_label.text = f"Descrição do Item: {descricao}" if descricao else "Descrição do Item: Não encontrado"
+
+    def set_usuario(self, contagem, operador):
         self.contagem = contagem
         self.operador = operador
 
@@ -110,5 +123,5 @@ class ContagemScreen(Screen):
 class ScreenManagement(ScreenManager):
     def __init__(self, db_manager, offline_queue, **kwargs):
         super(ScreenManagement, self).__init__(**kwargs)
-        self.add_widget(ParametrizacaoScreen(name='parametrizacao'))
+        self.add_widget(UsuarioScreen(name='usuario'))
         self.add_widget(ContagemScreen(name='contagem', db_manager=db_manager, offline_queue=offline_queue))
