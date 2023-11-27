@@ -1,9 +1,19 @@
+from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 import socket
+
+
+# Tela de Contagem
+def mostrar_popup(motivo, mensagem):
+    """ Exibe um pop-up com uma mensagem de erro. """
+    popup = Popup(title=motivo,
+                  content=Label(text=mensagem),
+                  size_hint=(None, None), size=(400, 200))
+    popup.open()
 
 
 # Tela de Parametrização de Contagem
@@ -40,7 +50,6 @@ class UsuarioScreen(Screen):
         self.manager.current = 'contagem'
 
 
-# Tela de Contagem
 class ContagemScreen(Screen):
     def __init__(self, db_manager, offline_queue, **kwargs):
         super().__init__(**kwargs)
@@ -81,6 +90,12 @@ class ContagemScreen(Screen):
         self.contagem = None
         self.operador = None
 
+    def resetar_campos(self):
+        # Limpa os campos de entrada
+        self.endereco_input.text = ''
+        self.codigo_input.text = ''
+        self.quantidade_input.text = ''
+
 
     def on_codigo_text(self, instance, value):
         # Busca a descrição quando o texto do código é modificado
@@ -99,8 +114,8 @@ class ContagemScreen(Screen):
 
         # Utiliza self.contagem e self.operador
         if self.db_manager.contagem_existente(self.contagem, endereco):
-            print("Erro: Contagem já realizada para este endereço.")
-
+            self.resetar_campos()
+            mostrar_popup("Erro","Erro: Contagem já realizada para este endereço.")
             return
 
         elif self.esta_online():
@@ -111,6 +126,7 @@ class ContagemScreen(Screen):
                     'item_data': {'contagem': self.contagem, 'operador': self.operador, 'endereco': endereco,
                                   'codigo': codigo, 'quantidade': quantidade}}
             self.offline_queue.add_to_queue(data)
+            self.resetar_campos()
 
     def esta_online(self):
         """
@@ -124,8 +140,8 @@ class ContagemScreen(Screen):
             s = socket.create_connection((host, 80), 2)
             s.close()
             return True
-        except:
-            pass
+        except BaseException as e:
+            mostrar_popup(f"Online Error", e)
         return False
 
 
