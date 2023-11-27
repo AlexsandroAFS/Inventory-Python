@@ -10,7 +10,7 @@ import socket
 class UsuarioScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
 
         # Adiciona widgets à tela
         self.layout.add_widget(Label(text='Número da Contagem:'))
@@ -39,11 +39,12 @@ class UsuarioScreen(Screen):
         # Muda para a tela de contagem
         self.manager.current = 'contagem'
 
+
 # Tela de Contagem
 class ContagemScreen(Screen):
     def __init__(self, db_manager, offline_queue, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
 
         # Adiciona widgets à tela
         self.layout.add_widget(Label(text='Endereço:'))
@@ -95,11 +96,20 @@ class ContagemScreen(Screen):
         codigo = self.codigo_input.text
         quantidade = self.quantidade_input.text
 
+
+
         # Utiliza self.contagem e self.operador
-        if self.esta_online():
+        if self.db_manager.contagem_existente(self.contagem, endereco):
+            print("Erro: Contagem já realizada para este endereço.")
+            return
+
+        elif self.esta_online():
             self.db_manager.add_inventory_item(self.contagem, self.operador, endereco, codigo, quantidade)
+
         else:
-            data = {'action': 'add', 'item_data': {'contagem': self.contagem, 'operador': self.operador, 'endereco': endereco, 'codigo': codigo, 'quantidade': quantidade}}
+            data = {'action': 'add',
+                    'item_data': {'contagem': self.contagem, 'operador': self.operador, 'endereco': endereco,
+                                  'codigo': codigo, 'quantidade': quantidade}}
             self.offline_queue.add_to_queue(data)
 
     def esta_online(self):
@@ -110,7 +120,7 @@ class ContagemScreen(Screen):
         try:
             # Tenta estabelecer um socket com um host comum (google.com)
             # na porta 80, que é a porta padrão para o protocolo HTTP.
-            host = socket.gethostbyname("www.google.com")
+            host = socket.gethostbyname("172.25.0.73")
             s = socket.create_connection((host, 80), 2)
             s.close()
             return True

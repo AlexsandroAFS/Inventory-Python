@@ -69,3 +69,15 @@ class DBManager:
             self.connection.commit()
         except Error as e:
             print(f"Erro ao adicionar item ao inventário: {e}")
+
+    def contagem_existente(self, contagem, endereco):
+        """ Verifica se a combinação de contagem e endereço já existe. """
+        try:
+            cursor = self.connection.cursor()
+            query = "SELECT COUNT(*) FROM inventario WHERE contagem = %s AND endereco = %s"
+            cursor.execute(query, (contagem, endereco))
+            (count,) = cursor.fetchone()
+            return count > 0
+        except Error as e:
+            print(f"Erro ao verificar contagem existente: {e}")
+            return False

@@ -1,5 +1,4 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
 from screen import ScreenManagement
 from db_manager import DBManager
 from offline_queue import OfflineQueue
