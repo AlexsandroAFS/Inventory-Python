@@ -81,6 +81,7 @@ class ContagemScreen(Screen):
         self.contagem = None
         self.operador = None
 
+
     def on_codigo_text(self, instance, value):
         # Busca a descrição quando o texto do código é modificado
         descricao = self.db_manager.get_descricao(value)
@@ -96,11 +97,10 @@ class ContagemScreen(Screen):
         codigo = self.codigo_input.text
         quantidade = self.quantidade_input.text
 
-
-
         # Utiliza self.contagem e self.operador
         if self.db_manager.contagem_existente(self.contagem, endereco):
             print("Erro: Contagem já realizada para este endereço.")
+
             return
 
         elif self.esta_online():
