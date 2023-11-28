@@ -11,7 +11,7 @@ class MainApp(App):
     def build(self):
         # Inicializa o gerenciador do banco de dados e a fila offline
         self.root = BoxLayout(orientation='vertical')
-        self.db_manager = DBManager(host='172.25.0.73', user='inventarioUS', password='PnakW}q60MY7',
+        self.db_manager = DBManager(host='172.25.0.731', user='inventarioUS', password='PnakW}q60MY7',
                                     database='inventarioDB')
         self.db_manager.connect()
         self.offline_queue = OfflineQueue()
@@ -24,8 +24,14 @@ class MainApp(App):
         btn_param.bind(on_press=lambda x: self.mudar_tela('usuario'))
         btn_contagem.bind(on_press=lambda x: self.mudar_tela('contagem'))
 
+        btn_monitor_fila = Button(text='Monitorar Fila')
+        btn_monitor_fila.bind(on_press=lambda x: self.mudar_tela('monitorFila'))
+
+
         navbar.add_widget(btn_param)
         navbar.add_widget(btn_contagem)
+        navbar.add_widget(btn_monitor_fila)
+
 
         self.root.add_widget(navbar)
 

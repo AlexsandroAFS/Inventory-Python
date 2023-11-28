@@ -1,5 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
+from screen import mostrar_popup
 
 
 class DBManager:
@@ -8,7 +9,9 @@ class DBManager:
         self.user = user
         self.password = password
         self.database = database
+
         self.connection = None
+        self.connect()
 
     def connect(self):
         """ Estabelece conexão com o banco de dados MySQL. """
@@ -23,6 +26,7 @@ class DBManager:
                 print("Conexão ao MySQL foi estabelecida")
         except Error as e:
             print(f"Erro ao conectar ao MySQL: {e}")
+            self.connection = None
 
     def get_descricao(self, codigo):
         """
@@ -35,6 +39,7 @@ class DBManager:
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
+            # mostrar_popup('Error',f"Erro ao buscar descrição: {e}")
             print(f"Erro ao buscar descrição: {e}")
             return None
 
@@ -68,16 +73,22 @@ class DBManager:
             cursor.execute(query, (contagem, usuario, endereco, codigo, quantidade))
             self.connection.commit()
         except Error as e:
+
             print(f"Erro ao adicionar item ao inventário: {e}")
 
     def contagem_existente(self, contagem, endereco):
-        """ Verifica se a combinação de contagem e endereço já existe. """
-        try:
-            cursor = self.connection.cursor()
-            query = "SELECT COUNT(*) FROM inventario WHERE contagem = %s AND endereco = %s"
-            cursor.execute(query, (contagem, endereco))
-            (count,) = cursor.fetchone()
-            return count > 0
-        except Error as e:
-            print(f"Erro ao verificar contagem existente: {e}")
-            return False
+
+        def contagem_existente(self, contagem, endereco):
+            if self.connection is None or not self.connection.is_connected():
+                print("Conexão com o banco de dados não está estabelecida.")
+                return False
+            """ Verifica se a combinação de contagem e endereço já existe. """
+            try:
+                cursor = self.connection.cursor()
+                query = "SELECT COUNT(*) FROM inventario WHERE contagem = %s AND endereco = %s"
+                cursor.execute(query, (contagem, endereco))
+                (count,) = cursor.fetchone()
+                return count > 0
+            except Error as e:
+                print(f"Erro ao verificar contagem existente: {e}")
+                return False
