@@ -38,5 +38,6 @@ class MainApp(App):
     def mudar_tela(self, nome_tela):
         self.screen_manager.current = nome_tela
 
+
 if __name__ == '__main__':
     MainApp().run()

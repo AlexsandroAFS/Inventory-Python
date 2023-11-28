@@ -12,7 +12,8 @@ def mostrar_popup(motivo, mensagem):
     """ Exibe um pop-up com uma mensagem de erro. """
     popup = Popup(title=motivo,
                   content=Label(text=mensagem),
-                  size_hint=(None, None), size=(400, 200))
+                  size_hint=(None, None),
+                  size=(400, 100))
     popup.open()
 
 
@@ -53,7 +54,10 @@ class UsuarioScreen(Screen):
 class ContagemScreen(Screen):
     def __init__(self, db_manager, offline_queue, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
+        self.layout = BoxLayout(orientation='vertical',
+                                padding=(10, 10, 15, 15),
+                                spacing=15,
+                                )
 
         # Adiciona widgets à tela
         self.layout.add_widget(Label(text='Endereço:'))
@@ -66,7 +70,7 @@ class ContagemScreen(Screen):
 
         # Campo
         self.layout.add_widget(Label(text='Código:'))
-        self.codigo_input = TextInput(multiline=False)
+        self.codigo_input = TextInput(multiline=False,)
         self.layout.add_widget(self.codigo_input)
 
         # Ligando o evento de texto modificado no campo de código
@@ -96,11 +100,16 @@ class ContagemScreen(Screen):
         self.codigo_input.text = ''
         self.quantidade_input.text = ''
 
-
     def on_codigo_text(self, instance, value):
         # Busca a descrição quando o texto do código é modificado
         descricao = self.db_manager.get_descricao(value)
         self.descricao_label.text = f"Descrição do Item: {descricao}" if descricao else "Descrição do Item: Não encontrado"
+
+    def on_locate_text(self, instance, value):
+        # Busca a descrição quando o código da localização é inserido
+        localizacao = self.db_manager.get_localizacao(value)
+        self.desc_loc_label.text = f"Descrição do Item: {localizacao}" if localizacao else "Descrição do Item: Não encontrado"
+
 
     def set_usuario(self, contagem, operador):
         self.contagem = contagem
@@ -115,16 +124,23 @@ class ContagemScreen(Screen):
         # Utiliza self.contagem e self.operador
         if self.db_manager.contagem_existente(self.contagem, endereco):
             self.resetar_campos()
-            mostrar_popup("Erro","Erro: Contagem já realizada para este endereço.")
+            mostrar_popup("Erro", "Erro: Contagem já realizada para este endereço.")
+            return
+
+        elif not self.contagem:
+            mostrar_popup("Erro", "Número da contagem não pode ser vazio.")
             return
 
         elif self.esta_online():
             self.db_manager.add_inventory_item(self.contagem, self.operador, endereco, codigo, quantidade)
-
+            self.resetar_campos()
         else:
             data = {'action': 'add',
-                    'item_data': {'contagem': self.contagem, 'operador': self.operador, 'endereco': endereco,
-                                  'codigo': codigo, 'quantidade': quantidade}}
+                    'item_data': {'contagem': self.contagem,
+                                  'operador': self.operador,
+                                  'endereco': endereco,
+                                  'codigo': codigo,
+                                  'quantidade': quantidade}}
             self.offline_queue.add_to_queue(data)
             self.resetar_campos()
 
@@ -136,7 +152,7 @@ class ContagemScreen(Screen):
         try:
             # Tenta estabelecer um socket com um host comum (google.com)
             # na porta 80, que é a porta padrão para o protocolo HTTP.
-            host = socket.gethostbyname("172.25.0.73")
+            host = socket.gethostbyname("www.google.com.br")
             s = socket.create_connection((host, 80), 2)
             s.close()
             return True
