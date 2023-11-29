@@ -148,7 +148,7 @@ class ContagemScreen(Screen):
 
         # Tentativa de adicionar item ao banco de dados ou salvar na fila offline
         try:
-            if self.esta_online() and self.db_manager.connection and self.db_manager.connection.is_connected():
+            if self.db_manager.connection and self.db_manager.connection.is_connected():
                 self.db_manager.add_inventory_item(self.contagem, self.usuario, endereco, codigo, quantidade)
                 mostrar_popup("Sucesso", "Dados enviados com sucesso.")
             else:
