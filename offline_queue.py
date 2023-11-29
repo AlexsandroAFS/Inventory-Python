@@ -1,6 +1,7 @@
 import json
 import os
 
+
 class OfflineQueue:
     def __init__(self, file_path='offline_queue.json'):
         self.file_path = file_path
@@ -46,5 +47,3 @@ class OfflineQueue:
         # Limpar a fila após o processamento
         self.queue = []
         self.save_queue()
-
-
