@@ -1,11 +1,14 @@
+from kivy.app import App
+from kivy.properties import StringProperty
 from kivy.uix.popup import Popup
-from kivy.uix.recycleview import RecycleView
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
-import socket
+from kivymd.uix.list import OneLineListItem, MDList
 
 
 # Tela de Contagem
@@ -29,9 +32,9 @@ class UsuarioScreen(Screen):
         self.contagem_input = TextInput(multiline=False)
         self.layout.add_widget(self.contagem_input)
 
-        self.layout.add_widget(Label(text='Número do Operador:'))
-        self.operador_input = TextInput(multiline=False)
-        self.layout.add_widget(self.operador_input)
+        self.layout.add_widget(Label(text='Número do usuario:'))
+        self.usuario_input = TextInput(multiline=False)
+        self.layout.add_widget(self.usuario_input)
 
         self.add_widget(self.layout)
         # Adiciona um botão para salvar e ir para a tela de contagem
@@ -42,11 +45,11 @@ class UsuarioScreen(Screen):
     def salvar_e_continuar(self, instance):
         # Salva os valores inseridos
         contagem = self.contagem_input.text
-        operador = self.operador_input.text
+        usuario = self.usuario_input.text
 
         # Define os valores na tela de contagem
         contagem_screen = self.manager.get_screen('contagem')
-        contagem_screen.set_usuario(contagem, operador)
+        contagem_screen.set_usuario(contagem, usuario)
 
         # Muda para a tela de contagem
         self.manager.current = 'contagem'
@@ -96,7 +99,7 @@ class ContagemScreen(Screen):
         self.add_widget(self.layout)
 
         self.contagem = None
-        self.operador = None
+        self.usuario = None
 
     def resetar_campos(self):
         # Limpa os campos de entrada
@@ -118,9 +121,9 @@ class ContagemScreen(Screen):
         localizacao = self.db_manager.get_localizacao(value)
         self.desc_loc_label.text = f"Descrição do Local: {localizacao}" if localizacao else "Descrição do Local: Não encontrado"
 
-    def set_usuario(self, contagem, operador):
+    def set_usuario(self, contagem, usuario):
         self.contagem = contagem
-        self.operador = operador
+        self.usuario = usuario
 
     def enviar_dados(self, instance):
         # Coleta dados dos inputs
@@ -146,7 +149,7 @@ class ContagemScreen(Screen):
         # Tentativa de adicionar item ao banco de dados ou salvar na fila offline
         try:
             if self.esta_online() and self.db_manager.connection and self.db_manager.connection.is_connected():
-                self.db_manager.add_inventory_item(self.contagem, self.operador, endereco, codigo, quantidade)
+                self.db_manager.add_inventory_item(self.contagem, self.usuario, endereco, codigo, quantidade)
                 mostrar_popup("Sucesso", "Dados enviados com sucesso.")
             else:
                 raise Exception("Offline")
@@ -154,7 +157,7 @@ class ContagemScreen(Screen):
             # Tratamento de erros e salvar na fila offline
             data = {'action': 'add',
                     'item_data': {'contagem': self.contagem,
-                                  'operador': self.operador,
+                                  'usuario': self.usuario,
                                   'endereco': endereco,
                                   'codigo': codigo,
                                   'quantidade': quantidade}}
@@ -163,47 +166,68 @@ class ContagemScreen(Screen):
 
         self.resetar_campos()
 
-    def esta_online(self):
-        """
-        Verifica se o dispositivo está conectado à internet tentando abrir um socket
-        para um host comum (por exemplo, Google) na porta 80.
-        """
-        try:
-            # Tenta estabelecer um socket com um host comum (google.com)
-            # na porta 80, que é a porta padrão para o protocolo HTTP.
-            host = socket.gethostbyname("www.google.comxbr")
-            s = socket.create_connection((host, 80), 2)
-            s.close()
-            return True
-        except BaseException as e:
-            mostrar_popup(f"Online Error", e)
-        return False
+
+class FilaItem(RecycleDataViewBehavior, BoxLayout):
+    """ Representa um item individual na lista de fila. """
+    texto = StringProperty("")
 
 
 class MonitorFilaScreen(Screen):
-    def __init__(self, offline_queue, **kwargs):
+    def __init__(self, db_manager, offline_queue, **kwargs):
         super().__init__(**kwargs)
+        self.db_manager = db_manager
         self.offline_queue = offline_queue
 
-        self.layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
         self.add_widget(self.layout)
 
-        self.lista_fila = RecycleView()
+        # Usar MDList dentro de um ScrollView
+        self.lista_fila = ScrollView()
+        self.md_list = MDList()
+        self.lista_fila.add_widget(self.md_list)
         self.layout.add_widget(self.lista_fila)
 
         self.atualizar_lista_fila()
 
-        btn_processar_fila = Button(text='Processar Fila')
+        btn_processar_fila = Button(text='Processar Fila', size=(10, 10))
         btn_processar_fila.bind(on_press=self.processar_fila)
         self.layout.add_widget(btn_processar_fila)
 
     def atualizar_lista_fila(self):
-        # Atualiza a lista com os itens da fila offline
-        self.lista_fila.data = [{'text': str(item)} for item in self.offline_queue.queue]
+        # Limpa a lista existente
+        self.md_list.clear_widgets()
+
+        # Adiciona itens à lista
+        for item in self.offline_queue.load_queue():
+            line_item = OneLineListItem(text=str(item))
+            self.md_list.add_widget(line_item)
 
     def processar_fila(self, instance):
-        # Implemente a lógica para processar a fila
-        pass
+        if not App.get_running_app().esta_online() or not self.db_manager.connection or not self.db_manager.connection.is_connected():
+            mostrar_popup("Erro", "Não há conexão com o banco de dados.")
+            return
+
+        itens_removidos = []
+        for item in self.offline_queue.queue:
+            contagem = item['item_data']['contagem']
+            endereco = item['item_data']['endereco']
+
+            if not self.db_manager.contagem_existente(contagem, endereco):
+                try:
+                    self.db_manager.add_inventory_item(**item['item_data'])
+                    itens_removidos.append(item)
+                except Exception as e:
+                    print(f"Erro ao adicionar item ao banco de dados: {e}")
+                    # Aqui, você pode decidir se deseja parar o processamento ou continuar tentando com os próximos
+                    # itens.
+
+        # Remover itens processados com sucesso da fila
+        for item in itens_removidos:
+            self.offline_queue.queue.remove(item)
+
+        # Após o processamento, atualize a lista e salve a fila
+        self.atualizar_lista_fila()
+        self.offline_queue.save_queue()
 
 
 # Gerenciador de Telas
@@ -212,4 +236,4 @@ class ScreenManagement(ScreenManager):
         super(ScreenManagement, self).__init__(**kwargs)
         self.add_widget(UsuarioScreen(name='usuario'))
         self.add_widget(ContagemScreen(name='contagem', db_manager=db_manager, offline_queue=offline_queue))
-        self.add_widget(MonitorFilaScreen(name='monitorFila', offline_queue=offline_queue))
+        self.add_widget(MonitorFilaScreen(name='monitorFila', db_manager=db_manager, offline_queue=offline_queue))
