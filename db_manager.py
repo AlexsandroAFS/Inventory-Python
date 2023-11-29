@@ -77,18 +77,18 @@ class DBManager:
             print(f"Erro ao adicionar item ao inventário: {e}")
 
     def contagem_existente(self, contagem, endereco):
+        if self.connection is None or not self.connection.is_connected():
+            print("Conexão com o banco de dados não está estabelecida.")
+            return False
+        """ Verifica se a combinação de contagem e endereço já existe. """
+        try:
+            cursor = self.connection.cursor()
+            query = "SELECT COUNT(*) FROM inventario WHERE contagem = %s AND endereco = %s"
+            cursor.execute(query, (contagem, endereco))
+            (count,) = cursor.fetchone()
+            return count > 0
+        except Error as e:
+            print(f"Erro ao verificar contagem existente: {e}")
+            return False
 
-        def contagem_existente(self, contagem, endereco):
-            if self.connection is None or not self.connection.is_connected():
-                print("Conexão com o banco de dados não está estabelecida.")
-                return False
-            """ Verifica se a combinação de contagem e endereço já existe. """
-            try:
-                cursor = self.connection.cursor()
-                query = "SELECT COUNT(*) FROM inventario WHERE contagem = %s AND endereco = %s"
-                cursor.execute(query, (contagem, endereco))
-                (count,) = cursor.fetchone()
-                return count > 0
-            except Error as e:
-                print(f"Erro ao verificar contagem existente: {e}")
-                return False
+
