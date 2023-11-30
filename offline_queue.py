@@ -8,11 +8,16 @@ class OfflineQueue:
         self.queue = self.load_queue()
 
     def load_queue(self):
-        """ Carrega a fila a partir de um arquivo JSON. """
         if os.path.exists(self.file_path):
             with open(self.file_path, 'r') as file:
-                return json.load(file)
-        return []
+                try:
+                    return json.load(file)
+                except json.JSONDecodeError:
+                    # Se o arquivo JSON estiver vazio ou for inválido, retorne uma lista vazia
+                    return []
+        else:
+            # Se o arquivo não existir, retorne uma lista vazia
+            return []
 
     def add_to_queue(self, data):
         """
