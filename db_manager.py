@@ -43,14 +43,14 @@ class DBManager:
             print(f"Erro ao buscar descrição: {e}")
             return None
 
-    def get_localizacao(self, id):
+    def get_localizacao(self, codigo):
         """
         Busca a descrição de um localizacao no banco de dados com base no código fornecido.
         """
         try:
             cursor = self.connection.cursor()
-            query = "SELECT descricao FROM localizacao WHERE id = %s"
-            cursor.execute(query, (id,))
+            query = "SELECT endereco FROM localizacao WHERE id = %s"
+            cursor.execute(query, (codigo,))
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
