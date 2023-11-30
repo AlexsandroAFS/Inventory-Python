@@ -82,6 +82,7 @@ class ContagemScreen(Screen):
 
         # Ligando o evento de texto modificado no campo de código
         self.codigo_input.bind(text=self.on_codigo_text)
+        self.endereco_input.bind(text=self.on_locate_text)
 
         self.layout.add_widget(Label(text='Quantidade:'))
         self.quantidade_input = TextInput(multiline=False)
@@ -118,8 +119,12 @@ class ContagemScreen(Screen):
 
     def on_locate_text(self, instance, value):
         # Busca a descrição quando o código da localização é inserido
-        localizacao = self.db_manager.get_localizacao(value)
-        self.desc_loc_label.text = f"Descrição do Local: {localizacao}" if localizacao else "Descrição do Local: Não encontrado"
+        try:
+            localizacao = self.db_manager.get_localizacao(value)
+            self.desc_loc_label.text = f"Descrição do Local: {localizacao}" if localizacao else "Descrição do Local: Não encontrado"
+        except BaseException as e:
+            print(e)
+            pass
 
     def set_usuario(self, contagem, usuario):
         self.contagem = contagem
