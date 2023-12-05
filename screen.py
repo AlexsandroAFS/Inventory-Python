@@ -11,6 +11,7 @@ from kivy.uix.button import Button
 from kivymd.uix.list import OneLineListItem, MDList
 from kivy.metrics import dp
 
+
 # Tela de Contagem
 def mostrar_popup(motivo, mensagem):
     """ Exibe um pop-up com uma mensagem de erro. """
@@ -159,7 +160,6 @@ class ContagemScreen(Screen):
         if not codigo:
             mostrar_popup("Sem Item Selecionado", "Insira um SKU valida.")
             return
-
 
         # Verifica se a contagem já existe
         if self.db_manager.contagem_existente(self.contagem, endereco):
