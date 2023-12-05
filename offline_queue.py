@@ -2,8 +2,10 @@ import json
 import os
 
 
+PATH = os.path.abspath('.')+'/'
+
 class OfflineQueue:
-    def __init__(self, file_path='offline_queue.json'):
+    def __init__(self, file_path=PATH+'offline_queue.json'):
         self.file_path = file_path
         self.queue = self.load_queue()
 
