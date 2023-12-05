@@ -15,6 +15,7 @@ class MainApp(MDApp):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Red"
         self.theme_cls.material_style = "M2"
+
         # Inicializa o gerenciador do banco de dados e a fila offline
         self.db_manager = DBManager(host='172.25.0.73',
                                     user='inventarioUS',
