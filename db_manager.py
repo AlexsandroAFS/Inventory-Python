@@ -43,6 +43,21 @@ class DBManager:
             print(f"Erro ao buscar descrição: {e}")
             return None
 
+    def get_reference(self, codigo):
+        """
+        Busca a referência de um item no banco de dados com base no código fornecido.
+        """
+        try:
+            cursor = self.connection.cursor()
+            query = "SELECT descricao FROM item WHERE iditem = %s"
+            cursor.execute(query, (codigo,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+        except Error as e:
+            # mostrar_popup('Error',f"Erro ao buscar descrição: {e}")
+            print(f"Erro ao buscar descrição: {e}")
+            return None
+
     def get_localizacao(self, codigo):
         """
         Busca a descrição de um localizacao no banco de dados com base no código fornecido.
