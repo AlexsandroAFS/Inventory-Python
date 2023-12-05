@@ -9,7 +9,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivymd.uix.list import OneLineListItem, MDList
-
+from kivy.metrics import dp
 
 # Tela de Contagem
 def mostrar_popup(motivo, mensagem):
@@ -25,7 +25,11 @@ def mostrar_popup(motivo, mensagem):
 class UsuarioScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
+        self.layout = BoxLayout(size_hint=(1, 1),
+                                height=dp(150),
+                                orientation='vertical',
+                                padding=(10, 10, 15, 15),
+                                spacing=15)
 
         # Adiciona widgets à tela
         self.layout.add_widget(Label(text='Número da Contagem:'))
@@ -58,12 +62,15 @@ class UsuarioScreen(Screen):
 class ContagemScreen(Screen):
     def __init__(self, db_manager, offline_queue, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical',
+
+        self.layout = BoxLayout(size_hint=(1, 1),
+                                height=dp(150),
+                                orientation='vertical',
                                 padding=(10, 10, 15, 15),
-                                spacing=15,
-                                )
+                                spacing=15)
+
         # Label para mostrar a localização
-        self.desc_loc_label = Label(text="Vaga: ")
+        self.desc_loc_label = Label(text="*", font_size=dp(25), bold=True)
         self.layout.add_widget(self.desc_loc_label)
 
         # Adiciona widgets à tela
@@ -72,7 +79,7 @@ class ContagemScreen(Screen):
         self.layout.add_widget(self.endereco_input)
 
         # Label para mostrar a descrição
-        self.descricao_label = Label(text="Descrição:")
+        self.descricao_label = Label(text="*", font_size=dp(25), bold=True)
         self.layout.add_widget(self.descricao_label)
 
         # Campo
@@ -112,7 +119,7 @@ class ContagemScreen(Screen):
         # Busca a descrição quando o texto do código é modificado
         try:
             descricao = self.db_manager.get_descricao(value)
-            self.descricao_label.text = f"Descrição do Item: {descricao}" if descricao else "Descrição do Item: Não encontrado"
+            self.descricao_label.text = descricao if descricao else "Descrição do Item: Não encontrado"
         except BaseException as e:
             print(e)
             pass
@@ -121,7 +128,7 @@ class ContagemScreen(Screen):
         # Busca a descrição quando o código da localização é inserido
         try:
             localizacao = self.db_manager.get_localizacao(value)
-            self.desc_loc_label.text = f"Descrição do Local: {localizacao}" if localizacao else "Descrição do Local: Não encontrado"
+            self.desc_loc_label.text = localizacao if localizacao else "Localização Não Encontrada"
         except BaseException as e:
             print(e)
             pass
@@ -138,12 +145,21 @@ class ContagemScreen(Screen):
 
         # Validação dos campos
         if not self.contagem:
-            mostrar_popup("Erro", "Número da contagem não pode ser vazio.")
+            mostrar_popup("Número da Contagem Invalida", "Número da Contagem Não Pode Estar Vazio.")
+            return
+        if not self.usuario:
+            mostrar_popup("Sem Usuário", "Por Favor forneça Número de Usuário")
+            return
+        if not endereco:
+            mostrar_popup("Sem Localização", "O item deve conter um piking para ser contado.")
+            return
+        if not quantidade:
+            mostrar_popup("Sem Quantidade", "Insira uma quantidade valida.")
+            return
+        if not codigo:
+            mostrar_popup("Sem Item Selecionado", "Insira um SKU valida.")
             return
 
-        if not endereco or not codigo or not quantidade:
-            mostrar_popup("Erro", "Todos os campos devem ser preenchidos.")
-            return
 
         # Verifica se a contagem já existe
         if self.db_manager.contagem_existente(self.contagem, endereco):
@@ -182,8 +198,12 @@ class MonitorFilaScreen(Screen):
         super().__init__(**kwargs)
         self.db_manager = db_manager
         self.offline_queue = offline_queue
+        self.layout = BoxLayout(size_hint=(1, None),
+                                height=dp(150),
+                                orientation='vertical',
+                                padding=(10, 10, 15, 15),
+                                spacing=15)
 
-        self.layout = BoxLayout(orientation='vertical', padding=(10, 10, 15, 15), spacing=15)
         self.add_widget(self.layout)
 
         # Usar MDList dentro de um ScrollView
@@ -208,25 +228,30 @@ class MonitorFilaScreen(Screen):
             self.md_list.add_widget(line_item)
 
     def processar_fila(self, instance):
-        if not App.get_running_app().esta_online() or not self.db_manager.connection or not self.db_manager.connection.is_connected():
+        if (not App.get_running_app().esta_online()
+                or not self.db_manager.connection
+                or not self.db_manager.connection.is_connected()):
             mostrar_popup("Erro", "Não há conexão com o banco de dados.")
             return
 
         itens_removidos = []
-        for item in self.offline_queue.queue:
+        for item in self.offline_queue.queue[:]:  # Faz uma cópia da fila para iterar
             contagem = item['item_data']['contagem']
             endereco = item['item_data']['endereco']
 
-            if not self.db_manager.contagem_existente(contagem, endereco):
+            if self.db_manager.contagem_existente(contagem, endereco):
+                mostrar_popup("Aviso", f"Contagem {contagem} no endereço {endereco} já existe no banco de dados.")
+                itens_removidos.append(item)
+            else:
                 try:
                     self.db_manager.add_inventory_item(**item['item_data'])
+                    mostrar_popup("Sucesso",
+                                  f"Item {item['item_data']['codigo']} adicionado ao inventário com sucesso.")
                     itens_removidos.append(item)
                 except Exception as e:
-                    print(f"Erro ao adicionar item ao banco de dados: {e}")
-                    # Aqui, você pode decidir se deseja parar o processamento ou continuar tentando com os próximos
-                    # itens.
+                    mostrar_popup("Erro", f"Erro ao adicionar item ao banco de dados: {e}")
 
-        # Remover itens processados com sucesso da fila
+        # Remover itens processados ou já existentes da fila
         for item in itens_removidos:
             self.offline_queue.queue.remove(item)
 
