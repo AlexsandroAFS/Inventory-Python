@@ -49,13 +49,13 @@ class DBManager:
         """
         try:
             cursor = self.connection.cursor()
-            query = "SELECT descricao FROM item WHERE iditem = %s"
+            query = "SELECT referencia FROM item WHERE iditem = %s"
             cursor.execute(query, (codigo,))
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
             # mostrar_popup('Error',f"Erro ao buscar descrição: {e}")
-            print(f"Erro ao buscar descrição: {e}")
+            print(f"Erro ao buscar referencia: {e}")
             return None
 
     def get_localizacao(self, codigo):
