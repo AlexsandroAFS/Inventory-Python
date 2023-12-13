@@ -1,19 +1,19 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title =Inventario Madville
 
 # (str) Package name
-package.name = myapp
+package.name = InvetoryIT
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = madville.ti
 
 # (str) Source code where the main.py live
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,json
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -29,7 +29,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.1
+version = 1.0
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
