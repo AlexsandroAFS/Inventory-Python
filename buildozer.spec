@@ -37,7 +37,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,idna,kivy-deps.angle,kivy-deps.glew,kivy-deps.sdl2,Kivy-Garden,kivymd,mysql,mysql-connector-python,mysqlclient,pexpect,Pillow,platformdirs,protobuf,ptyprocess,Pygments,PyMySQL,pypiwin32,pywin32,requests,sh,urllib3,virtualenv
+requirements = certifi==2023.11.17,charset-normalizer==3.3.2,docutils==0.20.1,idna==3.6,Kivy==2.2.1,kivy-deps.angle==0.3.3,kivy-deps.glew==0.3.1,kivy-deps.sdl2==0.6.0,Kivy-Garden==0.1.5,kivymd==1.1.1,mysql-connector-python==8.2.0,mysqlclient==2.2.0,Pillow==10.1.0,protobuf==4.21.12,Pygments==2.17.2,pypiwin32==223,pywin32==306,requests==2.31.0,urllib3==2.1.0
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
