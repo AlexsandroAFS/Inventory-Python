@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title =InventarioMadville
+title =Inventario Madville
 
 # (str) Package name
 package.name = InvetoryIT
