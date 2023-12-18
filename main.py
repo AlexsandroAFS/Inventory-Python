@@ -13,7 +13,7 @@ from screen import ScreenManagement
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Red"
+        #self.theme_cls.primary_palette = "Blue"
         self.theme_cls.material_style = "M2"
 
         # Inicializa o gerenciador do banco de dados e a fila offline
@@ -31,7 +31,7 @@ class MainApp(MDApp):
         self.nav_drawer = MDNavigationDrawer()
         self.nav_drawer.anchor = 'left'
         drawer_list = MDList()
-        for item_name in ["Configuração", "Contagem", "Monitorar Fila"]:
+        for item_name in ["Configuração", "Contagem Inventario", "Fila - Contagem Offline"]:
             item = OneLineListItem(text=item_name)
             item.bind(on_release=lambda x, name=item_name: self.nav_drawer_item_selected(name))
             drawer_list.add_widget(item)
@@ -41,7 +41,7 @@ class MainApp(MDApp):
         self.main_layout = MDBoxLayout(orientation='vertical')
 
         # Top AppBar
-        self.top_app_bar = MDTopAppBar(title="Inventario",orientation="vertical")
+        self.top_app_bar = MDTopAppBar(title="Madville - Inventario v1.0.1", orientation="vertical")
         self.top_app_bar.left_action_items = [['menu', lambda x: self.nav_drawer.set_state("open")]]
         # self.top_app_bar.elevation = 10
         self.main_layout.add_widget(self.top_app_bar)
@@ -58,9 +58,9 @@ class MainApp(MDApp):
         # Troca a tela com base no item selecionado
         if item_name == "Configuração":
             self.screen_manager.current = 'usuario'
-        elif item_name == "Contagem":
+        elif item_name == "Contagem Inventario":
             self.screen_manager.current = 'contagem'
-        elif item_name == "Monitorar Fila":
+        elif item_name == "Fila - Contagem Offline":
             self.screen_manager.current = 'monitorFila'
         self.nav_drawer.set_state("close")
 
@@ -72,6 +72,7 @@ class MainApp(MDApp):
             return True
         except:
             return False
+
 
 if __name__ == '__main__':
     MainApp().run()
