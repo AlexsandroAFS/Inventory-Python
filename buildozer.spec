@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title =Inventario Madville
+title =InventarioMadville
 
 # (str) Package name
 package.name = InvetoryIT
@@ -37,17 +37,17 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,idna,kivy-deps.angle,kivy-deps.glew,kivy-deps.sdl2,Kivy-Garden,kivymd,mysql,mysql-connector-python,mysqlclient,pexpect,Pillow,platformdirs,protobuf,ptyprocess,Pygments,PyMySQL,pypiwin32,pywin32,requests,sh,urllib3,virtualenv
+requirements = certifi==2023.11.17,charset-normalizer==3.3.2,docutils==0.20.1,idna==3.6,Kivy==2.2.1,kivymd==1.1.1,pymysql,protobuf==4.21.12,Pygments==2.17.2,pym,requests==2.31.0,urllib3==2.1.0
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = %(source.dir)s/img/loading.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = %(source.dir)s/img/icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -95,7 +95,7 @@ fullscreen = 0
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-#android.permissions = android.permission.INTERNET, (name=android.permission.WRITE_EXTERNAL_STORAGE;maxSdkVersion=18)
+android.permissions = android.permission.INTERNET, (name=android.permission.WRITE_EXTERNAL_STORAGE;maxSdkVersion=18)
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
