@@ -75,25 +75,30 @@ class ContagemScreen(Screen):
         self.layout.add_widget(self.desc_loc_label)
 
         # Adiciona widgets à tela
-        self.layout.add_widget(Label(text='Endereço:'))
-        self.endereco_input = TextInput(multiline=False)
+        #self.layout.add_widget(Label(text='Endereço:'))
+        self.endereco_input = TextInput(multiline=False,hint_text='Endereço')
         self.layout.add_widget(self.endereco_input)
 
         # Label para mostrar a descrição
-        self.descricao_label = Label(text="*", font_size=dp(25), bold=True)
+        self.descricao_label = Label(text="Descrição", font_size=dp(25), bold=True)
         self.layout.add_widget(self.descricao_label)
 
+        # Label para mostrar a descrição
+        self.reference_label = Label(text="Referencia", font_size=dp(15), bold=False)
+        self.layout.add_widget(self.reference_label)
+
         # Campo
-        self.layout.add_widget(Label(text='Código:'))
-        self.codigo_input = TextInput(multiline=False, )
+        #self.layout.add_widget(Label(text='Código:'))
+        self.codigo_input = TextInput(multiline=False,hint_text='Código do SKU')
         self.layout.add_widget(self.codigo_input)
 
         # Ligando o evento de texto modificado no campo de código
         self.codigo_input.bind(text=self.on_codigo_text)
+        self.codigo_input.bind(text=self.on_reference_text)
         self.endereco_input.bind(text=self.on_locate_text)
 
-        self.layout.add_widget(Label(text='Quantidade:'))
-        self.quantidade_input = TextInput(multiline=False)
+        #self.layout.add_widget(Label(text='Quantidade:'))
+        self.quantidade_input = TextInput(multiline=False,hint_text='Quantidade')
         self.layout.add_widget(self.quantidade_input)
 
         # Botão para enviar dados
@@ -121,6 +126,15 @@ class ContagemScreen(Screen):
         try:
             descricao = self.db_manager.get_descricao(value)
             self.descricao_label.text = descricao if descricao else "Descrição do Item: Não encontrado"
+        except BaseException as e:
+            print(e)
+            pass
+
+    def on_reference_text(self, instance, value):
+        # Busca a descrição quando o texto do código é modificado
+        try:
+            reference = self.db_manager.get_reference(value)
+            self.reference_label.text = reference if reference else "Referencia: Não encontrado"
         except BaseException as e:
             print(e)
             pass
@@ -169,7 +183,7 @@ class ContagemScreen(Screen):
 
         # Tentativa de adicionar item ao banco de dados ou salvar na fila offline
         try:
-            if self.db_manager.connection and self.db_manager.connection.is_connected():
+            if self.db_manager.connection:
                 self.db_manager.add_inventory_item(self.contagem, self.usuario, endereco, codigo, quantidade)
                 mostrar_popup("Sucesso", "Dados enviados com sucesso.")
             else:
