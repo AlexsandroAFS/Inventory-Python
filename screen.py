@@ -20,10 +20,13 @@ from kivymd.uix.textfield import MDTextField
 class MyLabel(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.bind(size=self.update_text_size)
         self.font_size = dp(20)
         self.bold = True
-        self.orientation = 'center'
+        self.halign = 'center'  # Alinhamento horizontal
+        self.valign = 'middle'  # Alinhamento vertical
+        self.bind(size=self.update_text_size)
+        self.size_hint = (1, None)  # Ajustar para largura total e altura mínima necessária
+
 
     def update_text_size(self, *args):
         self.text_size = (self.width, None)
