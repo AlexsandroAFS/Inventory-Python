@@ -11,6 +11,17 @@ from kivy.uix.button import Button
 from kivymd.uix.list import OneLineListItem, MDList
 from kivy.metrics import dp
 
+#Label Auto Ajuste
+class MyLabel(Label):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(size=self.update_text_size)
+        self.font_size = dp(20)
+        self.bold = True
+
+    def update_text_size(self, *args):
+        self.text_size = (self.width, None)
+
 
 # Tela de Contagem
 def mostrar_popup(motivo, mensagem):
@@ -71,25 +82,28 @@ class ContagemScreen(Screen):
                                 spacing=15)
 
         # Label para mostrar a localização
-        self.desc_loc_label = Label(text="*", font_size=dp(25), bold=True)
+        self.desc_loc_label = Label(text="Localização", font_size=dp(25), bold=True)
         self.layout.add_widget(self.desc_loc_label)
 
         # Adiciona widgets à tela
-        #self.layout.add_widget(Label(text='Endereço:'))
-        self.endereco_input = TextInput(multiline=False,hint_text='Endereço')
+        # self.layout.add_widget(Label(text='Endereço:'))
+        self.endereco_input = TextInput(multiline=False, hint_text='Localização')
         self.layout.add_widget(self.endereco_input)
 
         # Label para mostrar a descrição
-        self.descricao_label = Label(text="Descrição", font_size=dp(25), bold=True)
+        # Usar size_hint_x=None e text_size para controlar a largura do texto
+        self.descricao_label = MyLabel(text="Descrição muito longa que precisa ser quebrada em várias linhas.")
+        self.descricao_label.bind(size=self.descricao_label.setter('text_size'))  # Atualizar text_size quando o tamanho do Label muda
         self.layout.add_widget(self.descricao_label)
+
 
         # Label para mostrar a descrição
         self.reference_label = Label(text="Referencia", font_size=dp(15), bold=False)
         self.layout.add_widget(self.reference_label)
 
         # Campo
-        #self.layout.add_widget(Label(text='Código:'))
-        self.codigo_input = TextInput(multiline=False,hint_text='Código do SKU')
+        # self.layout.add_widget(Label(text='Código:'))
+        self.codigo_input = TextInput(multiline=False, hint_text='Código do SKU')
         self.layout.add_widget(self.codigo_input)
 
         # Ligando o evento de texto modificado no campo de código
@@ -97,8 +111,8 @@ class ContagemScreen(Screen):
         self.codigo_input.bind(text=self.on_reference_text)
         self.endereco_input.bind(text=self.on_locate_text)
 
-        #self.layout.add_widget(Label(text='Quantidade:'))
-        self.quantidade_input = TextInput(multiline=False,hint_text='Quantidade')
+        # self.layout.add_widget(Label(text='Quantidade:'))
+        self.quantidade_input = TextInput(multiline=False, hint_text='Quantidade')
         self.layout.add_widget(self.quantidade_input)
 
         # Botão para enviar dados
@@ -243,8 +257,7 @@ class MonitorFilaScreen(Screen):
 
     def processar_fila(self, instance):
         if (not App.get_running_app().esta_online()
-                or not self.db_manager.connection
-                or not self.db_manager.connection.is_connected()):
+                or not self.db_manager.connection):
             mostrar_popup("Erro", "Não há conexão com o banco de dados.")
             return
 
