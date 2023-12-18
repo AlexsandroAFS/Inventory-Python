@@ -1,6 +1,5 @@
-import mysql.connector
-from mysql.connector import Error
-from screen import mostrar_popup
+import pymysql
+from pymysql import Error
 
 
 class DBManager:
@@ -16,14 +15,13 @@ class DBManager:
     def connect(self):
         """ Estabelece conexão com o banco de dados MySQL. """
         try:
-            self.connection = mysql.connector.connect(
+            self.connection = pymysql.connect(
                 host=self.host,
                 user=self.user,
                 password=self.password,
                 database=self.database
             )
-            if self.connection.is_connected():
-                print("Conexão ao MySQL foi estabelecida")
+            print("Conexão ao MySQL foi estabelecida")
         except Error as e:
             print(f"Erro ao conectar ao MySQL: {e}")
             self.connection = None
@@ -39,7 +37,6 @@ class DBManager:
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
-            # mostrar_popup('Error',f"Erro ao buscar descrição: {e}")
             print(f"Erro ao buscar descrição: {e}")
             return None
 
@@ -54,7 +51,6 @@ class DBManager:
             result = cursor.fetchone()
             return result[0] if result else None
         except Error as e:
-            # mostrar_popup('Error',f"Erro ao buscar descrição: {e}")
             print(f"Erro ao buscar referencia: {e}")
             return None
 
@@ -74,7 +70,7 @@ class DBManager:
 
     def close_connection(self):
         """ Fecha a conexão com o banco de dados. """
-        if self.connection.is_connected():
+        if self.connection:
             self.connection.close()
             print("Conexão com o MySQL foi encerrada")
 
@@ -88,11 +84,10 @@ class DBManager:
             cursor.execute(query, (contagem, usuario, endereco, codigo, quantidade))
             self.connection.commit()
         except Error as e:
-
             print(f"Erro ao adicionar item ao inventário: {e}")
 
     def contagem_existente(self, contagem, endereco):
-        if self.connection is None or not self.connection.is_connected():
+        if self.connection is None or not self.connection.open:
             print("Conexão com o banco de dados não está estabelecida.")
             return False
         """ Verifica se a combinação de contagem e endereço já existe. """
@@ -105,5 +100,3 @@ class DBManager:
         except Error as e:
             print(f"Erro ao verificar contagem existente: {e}")
             return False
-
-
